@@ -1,0 +1,33 @@
+*.pyc
+*.qcow2
+*.raw
+*.initrd
+*.vmlinuz
+/*-manifests
+/*.d
+*.bak
+*.orig
+
+# Packages
+*.egg*
+*.egg-info
+dist
+build
+eggs
+
+# Unit test / coverage reports
+cover/
+.coverage*
+coverage.xml
+!.coveragerc
+.tox
+.stestr/
+.venv
+
+# pbr generates these
+AUTHORS
+ChangeLog
+
+# Editors
+*~
+*.sw?
