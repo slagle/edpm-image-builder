@@ -1,20 +1,21 @@
-ramdisk_images: 
-  - imagename: ironic-python-agent
-    elements:
-      - centos
-      - ironic-python-agent-ramdisk
-      - ironic-agent-multipath
-      - dynamic-login
-      - element-manifest
-      - network-gateway
-      - enable-packages-install
-      - override-pip-and-virtualenv
-      - extra-hardware
-      - selinux-permissive
-      - interface-names
-    min-tmpfs: 7
-    environment:
-      DIB_RELEASE: '9-stream'
-      DIB_EPEL_DISABLED: '1'
-      DIB_PYTHON_VERSION: '3'
-      DIB_DHCP_TIMEOUT: '60'
+- imagename: ironic-python-agent
+  elements:
+  # diskimage-builder elements
+  - centos
+  - dynamic-login
+  - element-manifest
+  - selinux-permissive
+  # edpm-image-builder elements
+  - enable-packages-install
+  - interface-names
+  - ironic-agent-multipath
+  - override-pip-and-virtualenv
+  # ironic-python-agent-builder elements
+  - extra-hardware
+  - ironic-python-agent-ramdisk
+  min-tmpfs: 7
+  environment:
+    DIB_RELEASE: '9-stream'
+    DIB_EPEL_DISABLED: '1'
+    DIB_PYTHON_VERSION: '3'
+    DIB_DHCP_TIMEOUT: '60'
