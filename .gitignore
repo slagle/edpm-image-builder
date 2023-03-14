@@ -3,6 +3,9 @@
 *.raw
 *.initrd
 *.vmlinuz
+*.initramfs
+*.kernel
+venv
 /*-manifests
 /*.d
 *.bak
