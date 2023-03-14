@@ -14,6 +14,7 @@
   - extra-hardware
   - ironic-python-agent-ramdisk
   min-tmpfs: 7
+  debug-trace: 2
   environment:
     DIB_RELEASE: '9-stream'
     DIB_EPEL_DISABLED: '1'
