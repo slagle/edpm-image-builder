@@ -1,0 +1,25 @@
+buildah:
+chrony:
+crudini:
+driverctl:
+iptables-services:
+jq:
+lvm2:
+nftables:
+numactl:
+openssh-server:
+openstack-selinux:
+openvswitch:
+os-net-config:
+podman:
+python3-libselinux:
+python3-pyyaml:
+rsync:
+tmpwatch:
+tuned-profiles-cpu-partitioning:
+sysstat:
+# Remove for hardened image requirements
+kexec-tools:
+  uninstall: True
+telnet:
+  uninstall: True
