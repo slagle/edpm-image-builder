@@ -1,0 +1,31 @@
+- imagename: edpm-hardened-uefi
+  types: [qcow2]
+  elements:
+  # diskimage-builder elements
+  - centos
+  - selinux-permissive
+  - stable-interface-names
+  - bootloader
+  - element-manifest
+  - dynamic-login
+  - dracut-regenerate
+  - modprobe
+  - openssh
+  - disable-nouveau
+  - reset-bls-entries
+  # edpm-image-builder elements
+  - edpm-base
+  - edpm-partition-uefi
+  - enable-packages-install
+  - interface-names
+  - iptables
+  - openvswitch
+  - override-pip-and-virtualenv
+  - remove-resolvconf
+  min-tmpfs: 7
+  environment:
+    DIB_RELEASE: '9-stream'
+    DIB_EPEL_DISABLED: '1'
+    DIB_PYTHON_VERSION: '3'
+    DIB_DHCP_TIMEOUT: '60'
+    DIB_IMAGE_SIZE: '4'
