@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -eux
+set -o pipefail
+
+# exit directly if DIB_YUM_REPO_CONF is defined
+if [ -n "${DIB_YUM_REPO_CONF:-}" ] ; then
+    echo "DIB_YUM_REPO_CONF is set - ignoring DIB_REPO_SETUP=$DIB_REPO_SETUP"
+    exit 0
+fi
+
+# Install latest version of repo-setup without installing pip or git
+cd /tmp
+curl -sL https://github.com/openstack-k8s-operators/repo-setup/archive/refs/heads/main.tar.gz | tar xvz
+cd repo-setup-main
+python3 -m venv ./venv
+source ./venv/bin/activate
+PBR_VERSION=0.0.0 python3 -m pip install ./
+
+# Run repo-setup
+repo_setup="repo-setup --output-path repos --branch $DIB_REPO_SETUP_BRANCH --rdo-mirror $DIB_REPO_SETUP_MIRROR $DIB_REPO_SETUP"
+if [ -n "$DIB_REPO_SETUP_DISTRO_MIRROR" ]; then
+    repo_setup+=" --mirror $DIB_REPO_SETUP_DISTRO_MIRROR"
+fi
+repo_setup+=" $DIB_REPO_SETUP"
+
+mkdir repos
+eval $repo_setup
+sudo cp repos/* /etc/yum.repos.d/
+
+# Exit venv
+deactivate
+cd

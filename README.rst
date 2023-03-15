@@ -5,16 +5,6 @@ edpm-image-builder
 A repository to build OS images for deploying EDPM bare metal nodes using
 diskimage-builder.
 
-DNF repositories
-----------------
-
-DNF repositories need to be configured on the build host, such as using the
-host's repositories or creating some with ``tripleo-repos``::
-
-  mkdir /path/to/repodir || true
-  tripleo-repos --output-path /path/to/repodir -d centos9 -b master current ceph deps
-  export DIB_YUM_REPO_CONF="/path/to/repodir/*"
-
 Image build elements
 --------------------
 
@@ -30,14 +20,19 @@ These can be installed in a venv, for example::
 edpm-hardened-uefi
 ------------------
 
-The CentOS-9-Stream version of ``edpm-hardened-uefi.qcow2`` can be built by running::
+The CentOS-9-Stream version of ``edpm-hardened-uefi.qcow2`` can be built with
+master branch current-podified by running::
 
     diskimage-builder ./images/edpm-hardened-uefi-centos-9-stream.yaml
+
+See dib/repo-setup/README.md for environment variables to control which RDO
+repositories to configure.
 
 ironic-python-agent
 -------------------
 
 The CentOS-9-Stream version of ``ironic-python-agent.initramfs`` and
-``ironic-python-agent.kernel`` can be built by running::
+``ironic-python-agent.kernel`` can be built with master branch current-podified by
+running::
 
     diskimage-builder ./images/ironic-python-agent-centos-9-stream.yaml

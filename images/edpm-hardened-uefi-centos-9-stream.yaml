@@ -22,8 +22,9 @@
   - openvswitch
   - override-pip-and-virtualenv
   - remove-resolvconf
+  - repo-setup
   min-tmpfs: 7
-  debug-trace: 2
+  debug-trace: 1
   environment:
     DIB_RELEASE: '9-stream'
     DIB_EPEL_DISABLED: '1'

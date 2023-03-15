@@ -13,6 +13,7 @@
   # ironic-python-agent-builder elements
   - extra-hardware
   - ironic-python-agent-ramdisk
+  - repo-setup
   min-tmpfs: 7
   debug-trace: 2
   environment:
