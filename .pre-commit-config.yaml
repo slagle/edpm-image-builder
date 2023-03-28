@@ -25,3 +25,16 @@ repos:
         # E501 - line is too long, would require local ignore or obfuscating changes
         # W503 - line break before binary operator, ignored by default
         entry: flake8 --ignore=E501,W503
+  - repo: https://github.com/openstack-dev/bashate
+    rev: 2.1.1
+    hooks:
+      - id: bashate
+        entry: bashate --error . --ignore=E006,E040
+        verbose: false
+        # Run bashate check for all bash scripts
+        # Ignores the following rules:
+        # E006: Line longer than 79 columns (as many scripts use jinja
+        #       templating, this is very difficult)
+        # E040: Syntax error determined using `bash -n` (as many scripts
+        #       use jinja templating, this will often fail and the syntax
+        #       error will be discovered in execution anyway)
