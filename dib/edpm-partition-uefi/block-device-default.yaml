@@ -136,4 +136,3 @@
         fstab:
             options: "rw,nodev,relatime"
             fsck-passno: 2
-
