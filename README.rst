@@ -21,18 +21,38 @@ edpm-hardened-uefi
 ------------------
 
 The CentOS-9-Stream version of ``edpm-hardened-uefi.qcow2`` can be built with
-master branch current-podified by running::
+master branch ``current-podified`` by running::
 
     diskimage-builder ./images/edpm-hardened-uefi-centos-9-stream.yaml
 
 See dib/repo-setup/README.md for environment variables to control which RDO
 repositories to configure.
 
+``edpm-hardened-uefi.qcow2`` can be packaged inside a container image for
+distribution by running::
+
+    buildah bud -f ./Containerfile.image -t edpm-hardened-uefi:latest
+
+It can then be copied out of the container image, for example into
+``/path/to/images``::
+
+    podman run --volume /path/to/images:/target:rw --rm edpm-hardened-uefi:latest
+
 ironic-python-agent
 -------------------
 
 The CentOS-9-Stream version of ``ironic-python-agent.initramfs`` and
-``ironic-python-agent.kernel`` can be built with master branch current-podified by
-running::
+``ironic-python-agent.kernel`` can be built with master branch
+``current-podified`` by running::
 
     diskimage-builder ./images/ironic-python-agent-centos-9-stream.yaml
+
+``ironic-python-agent.qcow2`` can be packaged inside a container image for
+distribution by running::
+
+    buildah bud -f ./Containerfile.ramdisk -t ironic-python-agent:latest
+
+It can then be copied out of the container image, for example into
+``/path/to/images``::
+
+    podman run --volume /path/to/images:/target:rw --rm ironic-python-agent:latest

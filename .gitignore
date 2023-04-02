@@ -5,6 +5,8 @@
 *.vmlinuz
 *.initramfs
 *.kernel
+*.sha256
+*.md5
 venv
 /*-manifests
 /*.d
