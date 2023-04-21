@@ -32,3 +32,6 @@
     DIB_PYTHON_VERSION: '3'
     DIB_DHCP_TIMEOUT: '60'
     DIB_IMAGE_SIZE: '4'
+    DIB_MODPROBE_BLACKLIST: 'usb-storage cramfs freevxfs jffs2 hfs hfsplus squashfs udf bluetooth'
+    DIB_BOOTLOADER_DEFAULT_CMDLINE: 'nofb nomodeset vga=normal audit=1 nousb'
+    DIB_BOOTLOADER_VIRTUAL_TERMINAL: ''
