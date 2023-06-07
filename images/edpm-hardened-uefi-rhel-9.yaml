@@ -1,0 +1,37 @@
+- imagename: edpm-hardened-uefi
+  types: [qcow2]
+  elements:
+  # diskimage-builder elements
+  - rhel
+  - stable-interface-names
+  - bootloader
+  - element-manifest
+  - dynamic-login
+  - dracut-regenerate
+  - modprobe
+  - openssh
+  - disable-nouveau
+  - reset-bls-entries
+  # edpm-image-builder elements
+  - edpm-base
+  - edpm-partition-uefi
+  - enable-packages-install
+  - interface-names
+  - iptables
+  - openvswitch
+  - override-pip-and-virtualenv
+  - remove-resolvconf
+  - repo-setup
+  min-tmpfs: 7
+  debug-trace: 1
+  checksum: true
+  environment:
+    DIB_RELEASE: '9'
+    DIB_PYTHON_VERSION: '3'
+    DIB_DHCP_TIMEOUT: '60'
+    DIB_IMAGE_SIZE: '4'
+    DIB_MODPROBE_BLACKLIST: 'usb-storage cramfs freevxfs jffs2 hfs hfsplus squashfs udf bluetooth'
+    # TODO remove memtest=0 when this change is available:
+    # https://review.opendev.org/c/openstack/diskimage-builder/+/884644
+    DIB_BOOTLOADER_DEFAULT_CMDLINE: 'memtest=0'
+    DIB_BOOTLOADER_VIRTUAL_TERMINAL: ''
