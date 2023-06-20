@@ -1,0 +1,23 @@
+- imagename: ironic-python-agent
+  elements:
+  # diskimage-builder elements
+  - rhel
+  - dynamic-login
+  - element-manifest
+  - selinux-permissive
+  # edpm-image-builder elements
+  - enable-packages-install
+  - interface-names
+  - ironic-agent-multipath
+  - override-pip-and-virtualenv
+  # ironic-python-agent-builder elements
+  - extra-hardware
+  - ironic-python-agent-ramdisk
+  - repo-setup
+  min-tmpfs: 7
+  debug-trace: 1
+  checksum: true
+  environment:
+    DIB_EPEL_DISABLED: '1'
+    DIB_PYTHON_VERSION: '3'
+    DIB_DHCP_TIMEOUT: '60'

@@ -47,6 +47,11 @@ The CentOS-9-Stream version of ``ironic-python-agent.initramfs`` and
 
     diskimage-builder ./images/ironic-python-agent-centos-9-stream.yaml
 
+Similarly, the rhel-9 version can be built with master branch
+``current-podified`` by running::
+
+    diskimage-builder ./images/ironic-python-agent-rhel-9.yaml
+
 ``ironic-python-agent.qcow2`` can be packaged inside a container image for
 distribution by running::
 
