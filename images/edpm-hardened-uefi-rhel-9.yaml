@@ -2,8 +2,7 @@
   types: [qcow2]
   elements:
   # diskimage-builder elements
-  - centos
-  - selinux-permissive
+  - rhel
   - stable-interface-names
   - bootloader
   - element-manifest
@@ -27,8 +26,7 @@
   debug-trace: 1
   checksum: true
   environment:
-    DIB_RELEASE: '9-stream'
-    DIB_EPEL_DISABLED: '1'
+    DIB_RELEASE: '9'
     DIB_PYTHON_VERSION: '3'
     DIB_DHCP_TIMEOUT: '60'
     DIB_IMAGE_SIZE: '4'
