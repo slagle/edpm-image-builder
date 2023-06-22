@@ -1,0 +1,8 @@
+---
+- job:
+    name: eib-content-provider-build-images
+    parent: content-provider-build-images-base
+
+- job:
+    name: eib-crc-podified-edpm-baremetal
+    parent: cifmw-crc-podified-edpm-baremetal
