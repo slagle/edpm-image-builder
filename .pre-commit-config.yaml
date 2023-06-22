@@ -31,6 +31,7 @@ repos:
       - id: bashate
         entry: bashate --error . --ignore=E006,E040
         verbose: false
+        exclude: 'dib/.*environment.d/.*'
         # Run bashate check for all bash scripts
         # Ignores the following rules:
         # E006: Line longer than 79 columns (as many scripts use jinja
