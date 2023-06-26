@@ -8,7 +8,7 @@
 # The files to copy are determined by the entries in the checksum file. Copying is skipped
 # if the same checksum file DEST_DIR has a matching entry. Resulting destination files
 # are checked with sha256sum.
-# 
+#
 # This script is limited to what is available in centos and ubi minimal container images
 set -eu
 
