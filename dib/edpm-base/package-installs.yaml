@@ -18,6 +18,7 @@ rsync:
 tmpwatch:
 tuned-profiles-cpu-partitioning:
 sysstat:
+iproute-tc:
 # Remove for hardened image requirements
 kexec-tools:
   uninstall: True
