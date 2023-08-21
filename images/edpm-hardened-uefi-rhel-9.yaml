@@ -15,6 +15,7 @@
   - edpm-base
   - edpm-partition-uefi
   - enable-packages-install
+  - interface-names
   - openvswitch
   - override-pip-and-virtualenv
   - remove-resolvconf
