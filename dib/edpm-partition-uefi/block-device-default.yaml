@@ -31,7 +31,7 @@
         flags: [ boot ]
         # The passed-in DIB_IMAGE_SIZE is       4GiB, 4096MiB
         # Otherwise, there is a 2MiB overhead
-        size: 3570MiB
+        size: 4594MiB
 - lvm:
     name: lvm
     base: [ root ]
@@ -48,14 +48,14 @@
           type: thin-pool
           base: vg
           # 20MiB overhead from root partition size
-          size: 3550MiB
+          size: 4574MiB
         - name: lv_root
           type: thin
           thin-pool: lv_thinpool
           base: vg
           # Volume sizes should be a multiple of 4MiB (1 LVM extent)
-          # so this is rounded down from 1566MiB
-          size: 1396MiB
+          # so this is rounded down from 2422MiB
+          size: 2420MiB
         - name: lv_tmp
           type: thin
           thin-pool: lv_thinpool

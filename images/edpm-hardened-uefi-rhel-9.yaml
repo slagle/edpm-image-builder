@@ -26,7 +26,7 @@
     DIB_RELEASE: '9'
     DIB_PYTHON_VERSION: '3'
     DIB_DHCP_TIMEOUT: '60'
-    DIB_IMAGE_SIZE: '4'
+    DIB_IMAGE_SIZE: '5'
     DIB_MODPROBE_BLACKLIST: 'usb-storage cramfs freevxfs jffs2 hfs hfsplus squashfs udf bluetooth'
     # TODO remove memtest=0 when this change is available:
     # https://review.opendev.org/c/openstack/diskimage-builder/+/884644
