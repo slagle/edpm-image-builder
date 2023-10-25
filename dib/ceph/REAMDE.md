@@ -1,0 +1,1 @@
+Install ceph from packages.
