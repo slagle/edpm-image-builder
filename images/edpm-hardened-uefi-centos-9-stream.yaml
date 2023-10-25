@@ -12,7 +12,6 @@
   - modprobe
   - disable-nouveau
   - reset-bls-entries
-  - fips
   # edpm-image-builder elements
   - edpm-base
   - edpm-partition-uefi
