@@ -1,0 +1,4 @@
+- imagename: ironic-python-agent
+  elements:
+  # Additional element to enable fips for other image defintion
+  - fips

@@ -26,6 +26,11 @@ master branch ``current-podified`` by running::
 
     diskimage-builder ./images/edpm-hardened-uefi-centos-9-stream.yaml
 
+To create a FIPS enabled image, add ``edpm-hardened-uefi-fips.yaml`` to
+include the ``fips`` element::
+
+    diskimage-builder ./images/edpm-hardened-uefi-centos-9-stream.yaml ./images/edpm-hardened-uefi-fips.yaml
+
 See dib/repo-setup/README.md for environment variables to control which RDO
 repositories to configure.
 

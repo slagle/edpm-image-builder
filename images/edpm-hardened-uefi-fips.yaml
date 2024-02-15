@@ -1,0 +1,4 @@
+- imagename: edpm-hardened-uefi
+  elements:
+  # Additional element to enable fips for other image defintion
+  - fips
