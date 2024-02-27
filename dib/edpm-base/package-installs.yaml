@@ -1,7 +1,9 @@
 buildah:
 chrony:
 crudini:
+crypto-policies-scripts:
 driverctl:
+grubby:
 iptables-services:
 jq:
 lvm2:
