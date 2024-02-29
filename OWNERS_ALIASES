@@ -1,0 +1,32 @@
+# See the OWNERS_ALIASES docs: https://git.k8s.io/community/contributors/guide/owners.md#owners_aliases
+
+aliases:
+  edpm-approvers:
+  - fao89
+  - fultonj
+  - rebtoor
+  - slagle
+  - bshephar
+  - rabi
+  - jpodivin
+  ci-approvers:
+  - lewisdenny
+  - frenzyfriday
+  - viroel
+  openstack-approvers:
+  - abays
+  - dprince
+  - olliewalsh
+  - stuggi
+  compute-approvers:
+  - gibizer
+  - SeanMooney
+  network-approvers:
+  - booxter
+  - karelyatin
+  - slawqo
+  baremetal-approvers:
+  - hjensas
+  - juliakreger
+  - steveb
+
