@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+if [ ${DIB_DEBUG_TRACE:-1} -gt 0 ]; then
+    set -x
+fi
+
+if [ -n "$DIB_HOST_CA" ]; then
+    for ca_file in $DIB_HOST_CA; do
+        sudo cp /etc/pki/ca-trust/source/anchors/$ca_file $TMP_MOUNT_PATH/etc/pki/ca-trust/source/anchors/
+    done
+fi
