@@ -1,0 +1,310 @@
+#!/usr/bin/env python
+# Copyright 2024 Red Hat, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+"""
+block-device-yaml
+=================
+
+Generates the opinionated block device layout for whole-disk images running
+OpenStack workloads. Defaults will generate the layout for
+edpm-hardened-uefi.qcow2 in a format used by the block device definition in
+diskimage-builder.
+"""
+import argparse
+import logging
+import os
+import re
+import sys
+
+BYTES_MIB = 1048576
+BYTES_GIB = 1073741824
+
+# overheads to account for in MiB
+OVERHEAD_PARTITION = 2
+OVERHEAD_ROOT_TO_POOL = 20
+
+DEFAULT_VOLUMES = "lv_root=:lv_tmp=300:lv_var=952:lv_log=300:lv_audit=300:lv_home=300"
+DEFAULT_FILESYSTEMS = "lv_root=fs_root:lv_tmp=fs_tmp:lv_var=fs_var:lv_log=fs_log:lv_audit=fs_audit:lv_home=fs_home"
+DEFAULT_MOUNTS = "lv_root=/:lv_tmp=/tmp:lv_var=/var:lv_log=/var/log:lv_audit=/var/log/audit:lv_home=/home"
+DEFAULT_MOUNT_OPTIONS = (
+    "lv_tmp=rw,nosuid,nodev,noexec,relatime:lv_home=rw,nodev,relatime"
+)
+DEFAULT_MOUNT_OPTION = "rw,relatime"
+PARTITION_SIZES = {
+    "efi": 200,
+    "bsp": 8,
+    "boot": 500,
+}
+
+UNIT_BYTES = {"MiB": BYTES_MIB, "GiB": BYTES_GIB}
+
+UNITS = ["%", "MiB", "GiB"]
+AMOUNT_UNIT_RE = re.compile("^([0-9]+)(%s)$" % "|".join(UNITS))
+
+logging.basicConfig()
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+
+
+class HelpFormatter(argparse.ArgumentDefaultsHelpFormatter,
+                    argparse.RawDescriptionHelpFormatter):
+    pass
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        description=(__doc__),
+        formatter_class=HelpFormatter,
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        help="Output file to write yaml to. When not specified writes to std out.",
+    )
+
+    parser.add_argument(
+        "--disk-size",
+        required=True,
+        help="Size of the whole disk image, with a required unit MiB or GiB",
+    )
+    parser.add_argument(
+        "--volumes",
+        default=DEFAULT_VOLUMES,
+        help="List of volume names and their sizes in MiB. One size value "
+        "can be left blank to be given the remaining space. ",
+    )
+
+    parser.add_argument(
+        "--filesystems",
+        default=DEFAULT_FILESYSTEMS,
+        help="List of volume names and their filesystem names. ",
+    )
+    parser.add_argument(
+        "--mounts",
+        default=DEFAULT_MOUNTS,
+        help="List of volume names and their mount paths. ",
+    )
+    parser.add_argument(
+        "--mount-options",
+        default=DEFAULT_MOUNT_OPTIONS,
+        help=f"List of volume names and their mount options, missing entries default to {DEFAULT_MOUNT_OPTION}.",
+    )
+    parser.add_argument(
+        "--env",
+        action="store_true",
+        help="Whether to wrap the output in shell variable DIB_BLOCK_DEVICE_CONFIG",
+    )
+
+    args = parser.parse_args(sys.argv[1:])
+    return args
+
+
+def partitioning(sizes):
+    return f"""# This file was generated with:
+# block-device-yaml {' '.join(sys.argv[1:])}
+# See: https://github.com/openstack-k8s-operators/edpm-image-builder/
+- local_loop:
+    name: image0
+- partitioning:
+    base: image0
+    label: gpt
+    partitions:
+      - name: ESP
+        type: 'EF00'
+        size: {sizes['efi']}MiB
+        mkfs:
+          type: vfat
+          mount:
+            mount_point: /boot/efi
+            fstab:
+              options: "defaults"
+              fsck-passno: 2
+      - name: BSP
+        type: 'EF02'
+        size: {sizes['bsp']}MiB
+      - name: boot
+        type: 'BC13C2FF-59E6-4262-A352-B275FD6F7172'
+        size: {sizes['boot']}MiB
+        mkfs:
+          type: ext4
+          mount:
+            mount_point: /boot
+            fstab:
+              options: "defaults"
+              fsck-passno: 1
+      - name: root
+        flags: [ boot ]
+        # The passed-in DIB_IMAGE_SIZE is {sizes['disk']}MiB
+        # Otherwise, there is a {OVERHEAD_PARTITION}MiB overhead
+        size: {sizes['root']}MiB
+"""
+
+
+def lvm_with_pool(sizes):
+    return f"""- lvm:
+    name: lvm
+    base: [ root ]
+    pvs:
+        - name: pv
+          base: root
+          options: [ "--force" ]
+    vgs:
+        - name: vg
+          base: [ "pv" ]
+          options: [ "--force" ]
+    lvs:
+        - name: lv_thinpool
+          type: thin-pool
+          base: vg
+          # {OVERHEAD_ROOT_TO_POOL}MiB overhead from root partition size
+          size: {sizes['pool']}MiB
+"""
+
+
+def volume_with_pool(name, size):
+    return f"""        - name: {name}
+          type: thin
+          thin-pool: lv_thinpool
+          base: vg
+          size: {size}MiB
+"""
+
+
+def mkfs(name, base, mount_point, options):
+    if mount_point == "/":
+        return f"""- mkfs:
+    name: {name}
+    base: {base}
+    type: xfs
+    label: "img-rootfs"
+    mount:
+        mount_point: {mount_point}
+        fstab:
+            options: "{options}"
+            fsck-passno: 1
+"""
+
+    else:
+        return f"""- mkfs:
+    name: {name}
+    base: {base}
+    type: xfs
+    mount:
+        mount_point: {mount_point}
+        fstab:
+            options: "{options}"
+            fsck-passno: 2
+"""
+
+
+def write_block_device_yaml(args, out):
+    sizes = {
+        "disk": size_to_mib(args.disk_size),
+    }
+    sizes.update(PARTITION_SIZES)
+    sizes["root"] = (
+        sizes["disk"] - sizes["efi"] - sizes["bsp"] - sizes["boot"] - OVERHEAD_PARTITION
+    )
+    sizes["pool"] = sizes["root"] - OVERHEAD_ROOT_TO_POOL
+
+    out.write(partitioning(sizes))
+    out.write(lvm_with_pool(sizes))
+
+    volumes = arg_to_dict(args.volumes)
+    calculate_blank_size(sizes, volumes)
+
+    for volume, volume_size in volumes.items():
+        out.write(volume_with_pool(volume, volume_size))
+
+    filesystems = arg_to_dict(args.filesystems)
+    mounts = arg_to_dict(args.mounts)
+    mount_options = arg_to_dict(args.mount_options)
+    for volume in volumes:
+        fs_name = filesystems.get(volume)
+        if fs_name:
+            fs_mount_point = mounts[volume]
+            fs_mount_option = mount_options.get(volume, DEFAULT_MOUNT_OPTION)
+            out.write(mkfs(fs_name, volume, fs_mount_point, fs_mount_option))
+        else:
+            log.warn(f"No filesystem entry for volume {volume}")
+
+
+def calculate_blank_size(sizes, volumes):
+    volumes_total_size = 0
+    blank_size = None
+    for volume, volume_size in volumes.items():
+        if not volume_size:
+            if blank_size:
+                raise Exception("Only one volume can have an empty size")
+            blank_size = volume
+        else:
+            vs = int(volume_size)
+            if vs % 4:
+                raise Exception(
+                    "Volume {volume} is size {volume_size}. It needs to be a multiple of 4MiB (1 LVM extent)"
+                )
+            volumes_total_size += vs
+    if blank_size:
+        bs = sizes["pool"] - volumes_total_size
+        # Round down to multiple of 4MiB
+        bs = bs - bs % 4
+        volumes[blank_size] = bs
+
+
+def size_to_mib(size):
+    m = AMOUNT_UNIT_RE.match(size)
+    if not m:
+        raise Exception("Value for <amount><unit> not valid: %s" % size)
+    amount = int(m.group(1))
+    unit = m.group(2)
+    if unit not in UNIT_BYTES:
+        raise Exception("Unsupported size unit: %s" % unit)
+    bytes = amount * UNIT_BYTES[unit]
+    log.debug("%s is %s, %s", size, bytes, bytes_to_mib(bytes))
+    return bytes_to_mib(bytes)
+
+
+def bytes_to_mib(num):
+    """Format a bytes amount with unit MiB"""
+    unit_suffix = "MiB"
+    unit = BYTES_MIB
+    unit_num = num // unit
+    return unit_num
+
+
+def arg_to_dict(arg):
+    d = {}
+    for kv in arg.split(":"):
+        k, v = kv.split("=")
+        d[k] = v
+    return d
+
+
+def main():
+    args = get_args()
+
+    if args.output:
+        out = open(args.output, "w")
+    else:
+        out = sys.stdout
+
+    if args.env:
+        out.write("export DIB_BLOCK_DEVICE_CONFIG='''\n")
+    write_block_device_yaml(args, out)
+    if args.env:
+        out.write("'''\n")
+
+
+if __name__ == "__main__":
+    sys.exit(main())
