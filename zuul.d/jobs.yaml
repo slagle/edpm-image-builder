@@ -2,6 +2,7 @@
 - job:
     name: eib-content-provider-build-images
     parent: content-provider-build-images-base
+    nodeset: centos-stream-9-vexxhost
 
 - job:
     name: eib-crc-podified-edpm-baremetal
