@@ -34,7 +34,7 @@ ARG PACKAGES="\
 	sysstat"
 ARG ENABLE_UNITS="openvswitch"
 
-RUN dnf -y update && dnf -y install $PACKAGES && dnf clean all && systemctl enable $ENABLE_UNITS
+RUN dnf -y install $PACKAGES && dnf clean all && systemctl enable $ENABLE_UNITS
 
 # Drop Ansible fact into place
 COPY ansible-facts/bootc.fact /usr/etc/ansible/facts.d/bootc.fact
