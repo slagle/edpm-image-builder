@@ -41,6 +41,10 @@ build: output/yum.repos.d
 	sudo buildah inspect ${EDPM_BOOTC_IMAGE} > /dev/null && exit 0 || true
 	sudo buildah bud -f ${EDPM_CONTAINERFILE} -t ${EDPM_BOOTC_IMAGE} .
 
+.PHONY: build-push
+build-push: build
+	sudo podman push ${EDPM_BOOTC_IMAGE}
+
 .PHONY: edpm-bootc.qcow2
 edpm-bootc.qcow2: build
 	ls output/edpm-bootc.qcow2 && exit 0 || true
@@ -63,6 +67,10 @@ package: edpm-bootc.qcow2
 	cp ../Containerfile.image output/
 	cd output
 	sudo buildah bud --build-arg IMAGE_NAME=edpm-bootc -f ./Containerfile.image -t ${EDPM_QCOW2_IMAGE}
+
+.PHONY: package-push
+package-push: package
+	sudo podman push ${EDPM_QCOW2_IMAGE}
 
 .PHONY: all
 all: build edpm-bootc.qcow2 package
