@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+BOOTC_SYSTEM="false"
+
+is_bootc() {
+  BOOTC_STATUS=$(sudo bootc status --json | jq .status.type)
+  if [[ "$BOOTC_STATUS" == \"bootcHost\" ]]; then
+     BOOTC_SYSTEM="true"
+  fi
+}
+
+is_bootc
+
+echo ${BOOTC_SYSTEM}
