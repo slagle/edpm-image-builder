@@ -33,7 +33,9 @@ ARG PACKAGES="\
     rsync \
     tmpwatch \
     tuned-profiles-cpu-partitioning \
-    sysstat"
+    sysstat \
+    yum-utils \
+    "
 ARG ENABLE_UNITS="openvswitch"
 
 RUN dnf -y install $PACKAGES && dnf clean all && systemctl enable $ENABLE_UNITS
