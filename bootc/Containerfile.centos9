@@ -36,7 +36,23 @@ ARG PACKAGES="\
     sysstat"
 ARG ENABLE_UNITS="openvswitch"
 
-RUN dnf -y install $PACKAGES && dnf clean all && systemctl enable $ENABLE_UNITS
+ARG LIBVIRT_PACKAGES="\
+    libvirt \
+    libvirt-admin \
+    libvirt-client \
+    libvirt-daemon \
+    qemu-kvm \
+    qemu-img \
+    libguestfs \
+    libseccomp \
+    swtpm \
+    swtpm-tools \
+    edk2-ovmf \
+    ceph-common \
+    cyrus-sasl-scram \
+    "
+
+RUN dnf -y install $PACKAGES $LIBVIRT_PACKAGES && dnf clean all && systemctl enable $ENABLE_UNITS
 
 # Workaround openstack-network-scripts failing to run update-alternatives
 # See https://issues.redhat.com/browse/OSPRH-13141
