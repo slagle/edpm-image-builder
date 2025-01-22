@@ -44,5 +44,5 @@ RUN ln -s /etc/sysconfig/network-scripts/ifup /usr/sbin/ifup
 RUN ln -s /etc/sysconfig/network-scripts/ifdown /usr/sbin/ifdown
 
 # Drop Ansible fact into place
-COPY ansible-facts/bootc.fact /usr/etc/ansible/facts.d/bootc.fact
-RUN chmod +x /usr/etc/ansible/facts.d/bootc.fact
+COPY ansible-facts/bootc.fact /etc/ansible/facts.d/bootc.fact
+RUN chmod +x /etc/ansible/facts.d/bootc.fact
