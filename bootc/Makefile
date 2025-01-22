@@ -7,6 +7,7 @@ BUILDER_IMAGE ?= quay.io/centos-bootc/bootc-image-builder:latest
 HOST_PACKAGES ?= podman osbuild-selinux
 REPO_SETUP ?= current-podified
 REPO_SETUP_BRANCH ?= master
+REPO_SETUP_DISTRO ?= centos9
 REPO_SETUP_DISTRO_MIRROR ?=
 REPO_SETUP_MIRROR ?= https://trunk.rdoproject.org
 
@@ -33,7 +34,7 @@ output/yum.repos.d: output/repo-setup
 	ls output/yum.repos.d && exit 0 || true
 	cd output
 	mkdir -p yum.repos.d
-	./repo-setup --output-path yum.repos.d --branch ${REPO_SETUP_BRANCH} --rdo-mirror ${REPO_SETUP_MIRROR} ${REPO_SETUP}
+	./repo-setup --output-path yum.repos.d --branch ${REPO_SETUP_BRANCH} --rdo-mirror ${REPO_SETUP_MIRROR} -d ${REPO_SETUP_DISTRO} ${REPO_SETUP}
 
 
 .PHONY: build
