@@ -64,3 +64,7 @@ RUN ln -s /etc/sysconfig/network-scripts/ifdown /usr/sbin/ifdown
 # Drop Ansible fact into place
 COPY ansible-facts/bootc.fact /etc/ansible/facts.d/bootc.fact
 RUN chmod +x /etc/ansible/facts.d/bootc.fact
+
+# This should be the last command
+# https://docs.fedoraproject.org/en-US/bootc/building-containers/#_linting
+RUN bootc container lint
