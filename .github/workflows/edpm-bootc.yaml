@@ -49,12 +49,21 @@ jobs:
       run: |
         echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
 
-    - name: Build edpm-bootc
-      id: build-edpm-bootc
+    - name: Build output/yum.repos.d
+      id: build-output-yum-repos-d
       run: |
         export EDPM_BOOTC_TAG=${latesttag}
         podman run --rm -it -v .:/bootc:rw,z quay.io/centos/centos:stream9 /bin/bash -c "cd bootc; dnf -y install make; make output/yum.repos.d"
-        make build
+
+    - name: Build and tag
+      id: buildah-build-edpm-bootc
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: edpm-bootc
+        tags: ${{ env.latesttag }} ${{ github.sha }}
+        containerfiles: |
+          ./bootc/Containerfile.centos9
+        context: bootc
 
     - name: Push edpm-bootc To ${{ env.imageregistry }}
       id: push-edpm-bootc
