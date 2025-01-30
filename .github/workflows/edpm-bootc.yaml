@@ -40,11 +40,13 @@ jobs:
 
     - name: Set latest tag for non main branch
       if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
+      shell: bash
       run: |
         echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
 
     - name: Build edpm-bootc
       id: build-edpm-bootc
+      shell: bash
       run: |
         cd bootc
         export EDPM_BOOTC_TAG=${latesttag}
@@ -61,6 +63,7 @@ jobs:
         password: ${{ secrets.QUAY_PASSWORD }}
 
     - name: Print image url and digest
+      shell: bash
       run: |
         echo "Image pushed to ${{ steps.push-edpm-bootc.outputs.registry-paths }}"
         echo "Image digest: ${{ steps.push-edpm-bootc.outputs.digest }}"
