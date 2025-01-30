@@ -6,6 +6,7 @@ on:
       - '*'
     paths:
       - bootc/**
+  workflow_dispatch:
 
 env:
   imageregistry: 'quay.io'
