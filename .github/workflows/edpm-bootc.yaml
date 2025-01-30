@@ -55,7 +55,7 @@ jobs:
       uses: redhat-actions/push-to-registry@v2
       with:
         image: edpm-bootc
-        tags: ${{ latesttag }}
+        tags: ${{ env.latesttag }}
         registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_PASSWORD }}
