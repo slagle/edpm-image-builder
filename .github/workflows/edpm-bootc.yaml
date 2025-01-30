@@ -6,12 +6,18 @@ on:
       - '*'
     paths:
       - bootc/**
+      - .github/workflows/edpm-bootc.yaml
   workflow_dispatch:
 
 env:
   imageregistry: 'quay.io'
   imagenamespace: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
   latesttag: latest
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./bootc
 
 jobs:
 
@@ -40,16 +46,14 @@ jobs:
 
     - name: Set latest tag for non main branch
       if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
-      shell: bash
       run: |
         echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
 
     - name: Build edpm-bootc
       id: build-edpm-bootc
-      shell: bash
       run: |
-        cd bootc
         export EDPM_BOOTC_TAG=${latesttag}
+        podman run --rm -it -v .:/bootc:rw,z quay.io/centos/centos:stream9 /bin/bash -c "cd bootc; dnf -y install make; make output/yum.repos.d"
         make build
 
     - name: Push edpm-bootc To ${{ env.imageregistry }}
@@ -63,7 +67,6 @@ jobs:
         password: ${{ secrets.QUAY_PASSWORD }}
 
     - name: Print image url and digest
-      shell: bash
       run: |
         echo "Image pushed to ${{ steps.push-edpm-bootc.outputs.registry-paths }}"
         echo "Image digest: ${{ steps.push-edpm-bootc.outputs.digest }}"
