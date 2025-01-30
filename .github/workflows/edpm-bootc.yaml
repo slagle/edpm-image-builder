@@ -1,0 +1,65 @@
+name: edpm-bootc image builder
+
+on:
+  push:
+    branches:
+      - '*'
+    paths:
+      - bootc/**
+
+env:
+  imageregistry: 'quay.io'
+  imagenamespace: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
+  latesttag: latest
+
+jobs:
+
+  check-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secrets are set
+        id: have-secrets
+        if: "${{ env.imagenamespace != '' }}"
+        run: echo "ok=true" >> $GITHUB_OUTPUT
+    outputs:
+      have-secrets: ${{ steps.have-secrets.outputs.ok }}
+
+  build-edpm-bootc:
+    name: Build edpm-bootc using Makefile
+    runs-on: ubuntu-latest
+    needs: [check-secrets]
+    if: needs.check-secrets.outputs.have-secrets == 'true'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Get branch name
+      id: branch-name
+      uses: tj-actions/branch-names@v5
+
+    - name: Set latest tag for non main branch
+      if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
+      run: |
+        echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
+
+    - name: Build edpm-bootc
+      id: build-edpm-bootc
+      run: |
+        cd bootc
+        export EDPM_BOOTC_TAG=${latesttag}
+        make build
+
+    - name: Push edpm-bootc To ${{ env.imageregistry }}
+      id: push-edpm-bootc
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: edpm-bootc
+        tags: ${{ latesttag }}
+        registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_PASSWORD }}
+
+    - name: Print image url and digest
+      run: |
+        echo "Image pushed to ${{ steps.push-edpm-bootc.outputs.registry-paths }}"
+        echo "Image digest: ${{ steps.push-edpm-bootc.outputs.digest }}"
