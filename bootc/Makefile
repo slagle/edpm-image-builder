@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 EDPM_BOOTC_REPO ?= quay.io/openstack-k8s-operators/edpm-bootc
 EDPM_BOOTC_TAG ?= latest
 EDPM_CONTAINERFILE ?= Containerfile.centos9
