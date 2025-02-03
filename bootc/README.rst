@@ -27,4 +27,3 @@ To deploy EDPM baremetal with this image, customize the ``baremetalSetTemplate``
     baremetalSetTemplate:
         osContainerImageUrl: quay.io/<account>/edpm-bootc:latest-qcow2
         osImage: edpm-bootc.qcow2
-
