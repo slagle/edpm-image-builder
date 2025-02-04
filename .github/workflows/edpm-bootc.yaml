@@ -11,25 +11,14 @@ on:
 
 env:
   imageregistry: 'quay.io'
-  imagenamespace: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
+  imagenamespace: 'openstack-k8s-operators'
   latesttag: latest
 
 jobs:
 
-  check-secrets:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check secrets are set
-        id: have-secrets
-        if: "${{ env.imagenamespace != '' }}"
-        run: echo "ok=true" >> $GITHUB_OUTPUT
-    outputs:
-      have-secrets: ${{ steps.have-secrets.outputs.ok }}
-
   build-edpm-bootc:
     name: Build edpm-bootc container image
     runs-on: ubuntu-latest
-    needs: [check-secrets]
 
     defaults:
       run:
@@ -48,28 +37,25 @@ jobs:
       run: |
         echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
 
-    - name: Build output/yum.repos.d
-      id: build-output-yum-repos-d
-      run: |
-        export EDPM_BOOTC_TAG=${latesttag}
-        podman run --rm -it -v .:/bootc:rw,z quay.io/centos/centos:stream9 /bin/bash -c "cd bootc; dnf -y install make; make output/yum.repos.d"
-
-    - name: Build and tag edpm-bootc container image
-      id: buildah-build-edpm-bootc
-      uses: redhat-actions/buildah-build@v2
-      with:
-        image: edpm-bootc
-        tags: ${{ env.latesttag }} ${{ github.sha }}
-        containerfiles: |
-          ./bootc/Containerfile.centos9
-        context: bootc
-
-    - name: Print image url and digest
-      run: |
-        echo "Image pushed to ${{ steps.push-edpm-bootc.outputs.registry-paths }}"
-        echo "Image digest: ${{ steps.push-edpm-bootc.outputs.digest }}"
-
     - name: Build and push edpm-bootc.qcow2 container image
       id: build-and-push-edpm-bootc-qcow2
       run: |
-        make package-push
+        # workaround https://github.com/containers/podman/issues/21683
+        sudo apt install -y sqlite3
+        echo "update DBConfig set GraphDriver = 'overlay' where GraphDriver = '';" | sudo sh -c '(cd /var/lib/containers/storage && sqlite3 db.sql)'
+        mkdir output
+        sudo podman pull quay.io/openstack-k8s-operators/edpm-bootc:latest
+        sudo podman run --rm -it --privileged \
+          --security-opt label=type:unconfined_t \
+          -v ./output:/output \
+          -v /var/lib/containers/storage:/var/lib/containers/storage \
+          quay.io/centos-bootc/bootc-image-builder:latest \
+          --type qcow2 \
+          --local \
+          ${{ env.imageregistry }}/${{ env.imagenamespace  }}/edpm-bootc:${{ env.latesttag }}
+        cd output
+        sudo mv qcow2/disk.qcow2 edpm-bootc.qcow2
+        sudo sha256sum edpm-bootc.qcow2 > edpm-bootc.qcow2.sha256
+        cp ../../copy_out.sh .
+        cp ../../Containerfile.image .
+        buildah build --build-arg IMAGE_NAME=edpm-bootc -f ./Containerfile.image -t ${{ env.imageregistry }}/${{ env.imagenamespace  }}/edpm-bootc:${{ env.latesttag }}-qcow2
