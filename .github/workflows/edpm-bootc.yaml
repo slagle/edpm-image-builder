@@ -30,7 +30,6 @@ jobs:
     name: Build edpm-bootc container image
     runs-on: ubuntu-latest
     needs: [check-secrets]
-    if: needs.check-secrets.outputs.have-secrets == 'true'
 
     defaults:
       run:
@@ -64,16 +63,6 @@ jobs:
         containerfiles: |
           ./bootc/Containerfile.centos9
         context: bootc
-
-    - name: Push edpm-bootc To ${{ env.imageregistry }}
-      id: push-edpm-bootc
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: edpm-bootc
-        tags: ${{ env.latesttag }}
-        registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
 
     - name: Print image url and digest
       run: |
